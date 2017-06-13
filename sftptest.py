@@ -22,6 +22,8 @@ class ClientSftp:
 		self.cd = ''
 		self.folders = []
 
+		self.fullAdr = ['.']
+
 		try:
 			self.connect()
 			self.folders = self.get_dir('')
@@ -64,27 +66,28 @@ class ClientSftp:
 		self.client.close()
 
 	def get_dir(self, adress):
-		if (adress.strip() == ''):
-			adr = '.'
-		else:
-			adr = './' + adress.strip()
 
-		dirlist = self.client.listdir(adr)
 		files = []
 		directory = []
+
+		if adress.strip() == '' or adress.strip() == '.':
+			adr = '.'
+		else:
+			directory.append('!!!UP')
+			adr = adress.strip()
+
+		dirlist = self.client.listdir(adr)
+
 		for dir in dirlist:
-			if 'd' in str(self.client.lstat('./' + adress + '/' + dir)): 
-				directory.append(dir)
+			if 'd' in str(self.client.lstat('./' + adress + '/' + dir)):
+				directory.append('/' + dir)
 			else:
 				files.append(dir)
 
-		for d in directory:
-			d = '/' + d
+		res = directory.copy()
+		res.extend(files)
 
-#		for f in files:
-#			print('' + f)
-
-		return directory
+		return res
 
 
 

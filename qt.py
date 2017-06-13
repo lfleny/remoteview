@@ -61,7 +61,13 @@ class Screan(QWidget):
         except Exception as e:
             print('cant connect')
             raise
-        
+    #Обновление окна текущей дирректории
+    def refresfList(self):
+        self.folders.clear()
+        print(self.connection.folders)
+        self.folders.addItems(self.connection.folders)
+        #self.folders.itemDoubleClicked.connect(self.printDir)
+        return True
 
     def buttonDisconnect(self):
         self.connection.close()
@@ -71,6 +77,20 @@ class Screan(QWidget):
         self.portEdit.setReadOnly(False)
 
     def printDir(self, item):
+        if item.text() == '!!!UP':
+            self.connection.fullAdr.pop(len(self.connection.fullAdr) - 1)
+            self.curDirEdit.setText('/'.join(self.connection.fullAdr))
+            self.connection.folders = self.connection.get_dir('/'.join(self.connection.fullAdr))
+            self.refresfList()
+        elif item.text()[0] == '/':
+            self.connection.fullAdr.append(item.text()[1:])
+            self.curDirEdit.setText('/'.join(self.connection.fullAdr))
+            self.connection.folders = self.connection.get_dir('/'.join(self.connection.fullAdr))
+            self.refresfList()
+        else:
+            print('it is a file')
+            
+
         print(item.text())
 
         
