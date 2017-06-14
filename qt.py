@@ -1,6 +1,10 @@
 import sys
 from sftptest import ClientSftp
 from PyQt5.QtWidgets import (QWidget, QLabel, QLineEdit, QTextEdit, QGridLayout, QApplication, QPushButton, QListWidget)
+
+import logging
+
+logging.basicConfig(filename='example.log', level=logging.DEBUG)
  
 class Screan(QWidget):
     
@@ -51,10 +55,7 @@ class Screan(QWidget):
     def buttonConnect(self):
         try:
             self.connection = ClientSftp(self.hostEdit.text(), self.userEdit.text(), self.passwordEdit.text(), int(self.portEdit.text()))
-            self.hostEdit.setReadOnly(True)
-            self.userEdit.setReadOnly(True)
-            self.passwordEdit.setReadOnly(True)
-            self.portEdit.setReadOnly(True)
+            self.changeReadOnlyConn(True)
             self.folders.addItems(self.connection.folders)
             self.folders.itemDoubleClicked.connect(self.printDir)
             pass
@@ -62,36 +63,45 @@ class Screan(QWidget):
             print('cant connect')
             raise
     #Обновление окна текущей дирректории
+
+    def changeReadOnlyConn(self, state):
+        self.hostEdit.setReadOnly(state)
+        self.userEdit.setReadOnly(state)
+        self.passwordEdit.setReadOnly(state)
+        self.portEdit.setReadOnly(state)
+
     def refresfList(self):
         self.folders.clear()
-        print(self.connection.folders)
         self.folders.addItems(self.connection.folders)
-        #self.folders.itemDoubleClicked.connect(self.printDir)
-        return True
 
     def buttonDisconnect(self):
         self.connection.close()
-        self.hostEdit.setReadOnly(False)
-        self.userEdit.setReadOnly(False)
-        self.passwordEdit.setReadOnly(False)
-        self.portEdit.setReadOnly(False)
+        self.folders.clear()
+        self.changeReadOnlyConn(False)
 
     def printDir(self, item):
-        if item.text() == '!!!UP':
-            self.connection.fullAdr.pop(len(self.connection.fullAdr) - 1)
-            self.curDirEdit.setText('/'.join(self.connection.fullAdr))
-            self.connection.folders = self.connection.get_dir('/'.join(self.connection.fullAdr))
-            self.refresfList()
-        elif item.text()[0] == '/':
-            self.connection.fullAdr.append(item.text()[1:])
-            self.curDirEdit.setText('/'.join(self.connection.fullAdr))
-            self.connection.folders = self.connection.get_dir('/'.join(self.connection.fullAdr))
-            self.refresfList()
-        else:
-            print('it is a file')
+        try:
+            if item.text() == '!!!UP':
+                self.connection.fullAdr.pop(len(self.connection.fullAdr) - 1)
+                self.curDirEdit.setText('/'.join(self.connection.fullAdr))
+                self.connection.folders = self.connection.get_dir('/'.join(self.connection.fullAdr))
+                self.refresfList()
+            elif item.text()[0] == '/':
+                self.connection.fullAdr.append(item.text()[1:])
+                self.curDirEdit.setText('/'.join(self.connection.fullAdr))
+                self.connection.folders = self.connection.get_dir('/'.join(self.connection.fullAdr))
+                self.refresfList()
+            elif item.text()[0] != '/':
+                path = '/'.join(self.connection.fullAdr) + '/' + item.text()
+                self.connection.downloadFile(path, item.text())
+                print('it is a file')
             
 
-        print(item.text())
+                print(item.text())
+        except BaseException:
+            logging.getLogger(__name__).exception("Program terminated")
+            raise
+        
 
         
 if __name__ == '__main__':
