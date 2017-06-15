@@ -7,22 +7,15 @@ class ClientSftp:
 		self.host = hostname
 		self.user = username
 		self.password = password
-		self.port = port
-
-		
-		self.folders = []
-
-		#адрес текущей диррективы
-		self.fullAdr = ['.']
+		self.port = port		
+		self.fullAdr = ['.'] #адрес текущей диррективы
 
 		try:
 			self.connect()
-			self.folders = self.get_dir()
 
 		except Exception as e:
 			print('errr')
-			raise
-		
+			raise	
 
 	def connect(self):
 		transport = paramiko.Transport((self.host, self.port))
@@ -32,27 +25,21 @@ class ClientSftp:
 	def close(self):
 		self.client.close()
 
-	def get_dir(self, adress = '.'):
+	def get_dir(self):
 
 		files = []
 		directory = []
 
-		if adress != '.':
-			directory.append('!!!UP')
+		if len(self.fullAdr) != 1 : directory.append('!!!UP')
 
-		dirlist = self.client.listdir(adress.strip())
+		[directory.append('/' + dir) if self.isDir(dir) else files.append(dir) 
+			for dir in self.client.listdir('/'.join(self.fullAdr))]
 
-		for dir in dirlist:
-			if 'd' in str(self.client.lstat(adress + '/' + dir)):
-				directory.append('/' + dir)
-			else:
-				files.append(dir)
+		directory.extend(files)
+		return directory
 
-		res = directory.copy()
-		res.extend(files)
-
-		return res
+	def isDir(self, dir):
+		return 'd' in str(self.client.lstat('/'.join(self.fullAdr) + '/' + dir))
 
 	def downloadFile(self, remote, local):
-		self.client.get(local,remote)
-		return True
+		self.client.get(remote, local)

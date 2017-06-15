@@ -56,7 +56,7 @@ class Screan(QWidget):
         try:
             self.connection = ClientSftp(self.hostEdit.text(), self.userEdit.text(), self.passwordEdit.text(), int(self.portEdit.text()))
             self.changeReadOnlyConn(True)
-            self.folders.addItems(self.connection.folders)
+            self.folders.addItems(self.connection.get_dir())
             self.folders.itemDoubleClicked.connect(self.printDir)
             pass
         except Exception as e:
@@ -84,12 +84,12 @@ class Screan(QWidget):
             if item.text() == '!!!UP':
                 self.connection.fullAdr.pop(len(self.connection.fullAdr) - 1)
                 self.curDirEdit.setText('/'.join(self.connection.fullAdr))
-                self.connection.folders = self.connection.get_dir('/'.join(self.connection.fullAdr))
+                self.connection.folders = self.connection.get_dir()
                 self.refresfList()
             elif item.text()[0] == '/':
                 self.connection.fullAdr.append(item.text()[1:])
                 self.curDirEdit.setText('/'.join(self.connection.fullAdr))
-                self.connection.folders = self.connection.get_dir('/'.join(self.connection.fullAdr))
+                self.connection.folders = self.connection.get_dir()
                 self.refresfList()
             elif item.text()[0] != '/':
                 path = '/'.join(self.connection.fullAdr) + '/' + item.text()
