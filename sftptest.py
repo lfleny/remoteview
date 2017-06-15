@@ -1,9 +1,9 @@
 import paramiko
+import json
 
 class ClientSftp:
 	
 	def __init__(self, hostname, username, password, port):
-		self.client = None
 		self.host = hostname
 		self.user = username
 		self.password = password
@@ -25,12 +25,12 @@ class ClientSftp:
 	def close(self):
 		self.client.close()
 
-	def get_dir(self):
-
+	def getDir(self):
 		files = []
 		directory = []
 
-		if len(self.fullAdr) != 1 : directory.append('!!!UP')
+		if len(self.fullAdr) != 1 :
+			directory.append('!!!UP')
 
 		[directory.append('/' + dir) if self.isDir(dir) else files.append(dir) 
 			for dir in self.client.listdir('/'.join(self.fullAdr))]
@@ -43,3 +43,14 @@ class ClientSftp:
 
 	def downloadFile(self, remote, local):
 		self.client.get(remote, local)
+
+
+class ClientLocal:
+	
+	def getConnectionList(self):
+		connections_file = open('connections.json', 'r')
+		return [key for key in json.load(connections_file)]
+
+	def getConnectionInfo(self, connectionName):
+		connections_file = open('connections.json', 'r')
+		return json.load(connections_file)[connectionName]
