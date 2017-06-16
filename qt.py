@@ -109,15 +109,17 @@ class newConnectionPopup(QWidget):
 
         self.name = name
         self.initUI()
+        self.setGeometry(300, 300, 350, 300)
 
     def initUI(self):
-        lblName = QLabel(self.name, self)
         self.hostEdit = QLineEdit(self)
         self.userEdit = QLineEdit()
         self.passwordEdit = QLineEdit()
         self.portEdit = QLineEdit()
         self.folders = QListWidget()
         self.curDirEdit = QLineEdit()
+        btnSaveConnecction = QPushButton("Save", self)
+        btnSaveConnecction.clicked.connect(self.buttSave)
         grid = QGridLayout()
         
         grid.setSpacing(10)
@@ -129,6 +131,24 @@ class newConnectionPopup(QWidget):
         grid.addWidget(self.passwordEdit, 3, 1)
         grid.addWidget(QLabel('Port'), 4, 0)
         grid.addWidget(self.portEdit, 4, 1)
+        grid.addWidget(btnSaveConnecction, 5, 1, 5, 2)
+
+        # adjust the margins or you will get an invisible, unintended border
+        grid.setContentsMargins(10, 10, 10, 10)
+        # need to set the layout
+        self.setLayout(grid)
+
+    def buttSave(self):
+        self.localClient = ClientLocal()
+        info = {
+        "host" : "test.ru",
+        "user" : "test",
+        "password" : "123",
+        "port" : 22
+        }
+        dict = {"new" : info}
+        self.localClient.saveConnectionInfo(dict)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

@@ -54,3 +54,12 @@ class ClientLocal:
 	def getConnectionInfo(self, connectionName):
 		connections_file = open('connections.json', 'r')
 		return json.load(connections_file)[connectionName]
+
+	def saveConnectionInfo(self,connectionInfo):
+		with open('connections.json', 'r') as file:
+			connections = json.load(file)
+			connections.update(connectionInfo)
+
+		connections_file = open('connections.json', 'w')	
+		connections_file.write(str(json.dumps(connections)))
+		connections_file.close()
